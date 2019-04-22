@@ -13,6 +13,9 @@ server.get('/', (req, res) => {
 
 server.post('/api/users', (req, res) => {
     const newUser = req.body;
+    if (!name || !bio) {
+        res.status(400).json({ errorMessage: "Please provide name and bio for the user." })
+    }
     db
         .insert(newUser)
         .then(user => {
@@ -43,7 +46,7 @@ server.get('/api/users/:id', (req, res) => {
              res.status(404).json({ error: "User with that id is not found"});
              return;
          }
-         res.json(user);
+         res.status(200).json(user);
      })
      .catch(err => {
          res.status(500).json({ error: "The user information could not be retrieved." })
@@ -55,6 +58,10 @@ server.delete('/api/users/:id', (req, res) => {
     db
         .remove(userId)
         .then(userId => {
+            if (userId.length === 0) {
+                res.status(404).json({ error: "User with that id is not found"});
+                return;
+            }
             res.status(200).json(userId);
         })
         .catch(err => {
@@ -64,9 +71,16 @@ server.delete('/api/users/:id', (req, res) => {
 
 server.put('/api/users/:id', (req, res) => {
     const updateId = req.params.id
+    if (!name || !bio) {
+        res.status(400).json({ errorMessage: "Please provide name and bio for the user." })
+    }
     db
         .update(updateId, req.body)
         .then(user => {
+            if (user.length === 0) {
+                res.status(404).json({ error: "User with that id is not found"});
+                return;
+            }
             res.status(200).json(user);
         })
         .catch(err => {
